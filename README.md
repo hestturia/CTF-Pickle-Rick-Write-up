@@ -2,9 +2,8 @@
 ## Walkthrough
 
 Este repositório contém o **walkthrough completo** do desafio **Pickle Rick**, disponível na plataforma **TryHackMe**.  
-O objetivo do CTF é localizar **três ingredientes (flags)** escondidos no sistema alvo, explorando vulnerabilidades em uma aplicação web e no sistema operacional subjacente.
+O objetivo do CTF é localizar **três ingredientes (flags)** escondidos no sistema alvo, explorando vulnerabilidades em uma aplicação web e no sistema operacional.
 
-Este write-up foi elaborado com foco **educacional**, documentando cada etapa do processo de forma clara e estruturada, seguindo uma metodologia básica de pentest.
 
 ---
 
@@ -14,7 +13,7 @@ Este write-up foi elaborado com foco **educacional**, documentando cada etapa do
 - **Desafio:** Pickle Rick  
 - **Máquina atacante:** Kali Linux  
 - **Conexão:** VPN TryHackMe  
-- **IP do alvo
+- **IP do alvo**
 
 ---
 
@@ -38,9 +37,9 @@ http://$IP
 
 Foi apresentada uma página simples contendo a frase:
 
-> **Rick is sup4r cool**
+**Rick is sup4r cool**
 
-![Página inicial](images/home.png)
+![Página inicial](images/Rick is sup4r cool.png)
 
 ---
 
