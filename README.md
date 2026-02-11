@@ -230,11 +230,11 @@ Foi encontrado o arquivo:
 
 
 ✅ Terceira flag obtida
-Assim, o desafio concluído com sucesso
+Assim, o desafio foi concluído com sucesso.
 
 ## 🧠 Conclusão
 
-Este desafio foi essencial para consolidar conceitos fundamentais de Segurança Ofensiva, proporcionando experiência prática em exploração de aplicações web, sistemas Linux e escalonamento de privilégios.
+Esse desafio foi essencial para consolidar conceitos fundamentais de Segurança Ofensiva, proporcionando experiência prática em exploração de aplicações web, sistemas Linux e escalonamento de privilégios.
 
 ## 🛠️ Habilidades Desenvolvidas
 
